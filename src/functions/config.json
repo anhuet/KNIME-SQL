@@ -1,0 +1,513 @@
+{
+  "_attributes": {
+    "xmlns": "http://www.knime.org/2008/09/XMLConfig",
+    "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+    "xsi:schemaLocation": "http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd",
+    "key": "settings.xml"
+  },
+  "entry": [
+    {
+      "_attributes": {
+        "key": "node_file",
+        "type": "xstring",
+        "value": "settings.xml"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "customDescription",
+        "type": "xstring",
+        "isnull": "true",
+        "value": ""
+      }
+    },
+    {
+      "_attributes": {
+        "key": "state",
+        "type": "xstring",
+        "value": "EXECUTED"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "factory",
+        "type": "xstring",
+        "value": "org.knime.base.node.preproc.filter.column.DataColumnSpecFilterNodeFactory"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "node-name",
+        "type": "xstring",
+        "value": "Column Filter"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "node-bundle-name",
+        "type": "xstring",
+        "value": "KNIME Base Nodes"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "node-bundle-symbolic-name",
+        "type": "xstring",
+        "value": "org.knime.base"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "node-bundle-vendor",
+        "type": "xstring",
+        "value": "KNIME AG, Zurich, Switzerland"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "node-bundle-version",
+        "type": "xstring",
+        "value": "5.4.0.v202412040959"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "node-feature-name",
+        "type": "xstring",
+        "value": "KNIME Base nodes"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "node-feature-symbolic-name",
+        "type": "xstring",
+        "value": "org.knime.features.base.feature.group"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "node-feature-vendor",
+        "type": "xstring",
+        "value": "KNIME AG, Zurich, Switzerland"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "node-feature-version",
+        "type": "xstring",
+        "value": "5.4.0.v202412040959"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "name",
+        "type": "xstring",
+        "value": "Column Filter"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "hasContent",
+        "type": "xboolean",
+        "value": "true"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "isInactive",
+        "type": "xboolean",
+        "value": "false"
+      }
+    }
+  ],
+  "config": [
+    {
+      "_attributes": {
+        "key": "flow_stack"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "internal_node_subsettings"
+      },
+      "entry": {
+        "_attributes": {
+          "key": "memory_policy",
+          "type": "xstring",
+          "value": "CacheSmallInMemory"
+        }
+      }
+    },
+    {
+      "_attributes": {
+        "key": "model"
+      },
+      "config": {
+        "_attributes": {
+          "key": "column-filter"
+        },
+        "entry": [
+          {
+            "_attributes": {
+              "key": "filter-type",
+              "type": "xstring",
+              "value": "STANDARD"
+            }
+          },
+          {
+            "_attributes": {
+              "key": "enforce_option",
+              "type": "xstring",
+              "value": "EnforceExclusion"
+            }
+          }
+        ],
+        "config": [
+          {
+            "_attributes": {
+              "key": "included_names"
+            },
+            "entry": [
+              {
+                "_attributes": {
+                  "key": "array-size",
+                  "type": "xint",
+                  "value": "3"
+                }
+              },
+              {
+                "_attributes": {
+                  "key": "0",
+                  "type": "xstring",
+                  "value": "country"
+                }
+              },
+              {
+                "_attributes": {
+                  "key": "1",
+                  "type": "xstring",
+                  "value": "date"
+                }
+              },
+              {
+                "_attributes": {
+                  "key": "2",
+                  "type": "xstring",
+                  "value": "amount"
+                }
+              }
+            ]
+          },
+          {
+            "_attributes": {
+              "key": "excluded_names"
+            },
+            "entry": [
+              {
+                "_attributes": {
+                  "key": "array-size",
+                  "type": "xint",
+                  "value": "5"
+                }
+              },
+              {
+                "_attributes": {
+                  "key": "0",
+                  "type": "xstring",
+                  "value": "row ID"
+                }
+              },
+              {
+                "_attributes": {
+                  "key": "1",
+                  "type": "xstring",
+                  "value": "product"
+                }
+              },
+              {
+                "_attributes": {
+                  "key": "2",
+                  "type": "xstring",
+                  "value": "quantity"
+                }
+              },
+              {
+                "_attributes": {
+                  "key": "3",
+                  "type": "xstring",
+                  "value": "card"
+                }
+              },
+              {
+                "_attributes": {
+                  "key": "4",
+                  "type": "xstring",
+                  "value": "Cust_ID"
+                }
+              }
+            ]
+          },
+          {
+            "_attributes": {
+              "key": "name_pattern"
+            },
+            "entry": [
+              {
+                "_attributes": {
+                  "key": "pattern",
+                  "type": "xstring",
+                  "value": ""
+                }
+              },
+              {
+                "_attributes": {
+                  "key": "type",
+                  "type": "xstring",
+                  "value": "Wildcard"
+                }
+              },
+              {
+                "_attributes": {
+                  "key": "caseSensitive",
+                  "type": "xboolean",
+                  "value": "true"
+                }
+              },
+              {
+                "_attributes": {
+                  "key": "excludeMatching",
+                  "type": "xboolean",
+                  "value": "false"
+                }
+              }
+            ]
+          },
+          {
+            "_attributes": {
+              "key": "datatype"
+            },
+            "config": {
+              "_attributes": {
+                "key": "typelist"
+              },
+              "entry": [
+                {
+                  "_attributes": {
+                    "key": "org.knime.core.data.StringValue",
+                    "type": "xboolean",
+                    "value": "false"
+                  }
+                },
+                {
+                  "_attributes": {
+                    "key": "org.knime.core.data.IntValue",
+                    "type": "xboolean",
+                    "value": "false"
+                  }
+                },
+                {
+                  "_attributes": {
+                    "key": "org.knime.core.data.BooleanValue",
+                    "type": "xboolean",
+                    "value": "false"
+                  }
+                },
+                {
+                  "_attributes": {
+                    "key": "org.knime.core.data.DoubleValue",
+                    "type": "xboolean",
+                    "value": "false"
+                  }
+                },
+                {
+                  "_attributes": {
+                    "key": "org.knime.core.data.LongValue",
+                    "type": "xboolean",
+                    "value": "false"
+                  }
+                },
+                {
+                  "_attributes": {
+                    "key": "org.knime.core.data.date.DateAndTimeValue",
+                    "type": "xboolean",
+                    "value": "false"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "_attributes": {
+        "key": "nodeAnnotation"
+      },
+      "entry": [
+        {
+          "_attributes": {
+            "key": "text",
+            "type": "xstring",
+            "value": "Select \"country\", %%00013%%00010\"date\" and \"amount\"%%00013%%00010columns"
+          }
+        },
+        {
+          "_attributes": {
+            "key": "contentType",
+            "type": "xstring",
+            "value": "text/plain"
+          }
+        },
+        {
+          "_attributes": {
+            "key": "bgcolor",
+            "type": "xint",
+            "value": "16777215"
+          }
+        },
+        {
+          "_attributes": {
+            "key": "x-coordinate",
+            "type": "xint",
+            "value": "247"
+          }
+        },
+        {
+          "_attributes": {
+            "key": "y-coordinate",
+            "type": "xint",
+            "value": "406"
+          }
+        },
+        {
+          "_attributes": {
+            "key": "width",
+            "type": "xint",
+            "value": "109"
+          }
+        },
+        {
+          "_attributes": {
+            "key": "height",
+            "type": "xint",
+            "value": "45"
+          }
+        },
+        {
+          "_attributes": {
+            "key": "alignment",
+            "type": "xstring",
+            "value": "CENTER"
+          }
+        },
+        {
+          "_attributes": {
+            "key": "borderSize",
+            "type": "xint",
+            "value": "0"
+          }
+        },
+        {
+          "_attributes": {
+            "key": "borderColor",
+            "type": "xint",
+            "value": "16777215"
+          }
+        },
+        {
+          "_attributes": {
+            "key": "defFontSize",
+            "type": "xint",
+            "value": "9"
+          }
+        },
+        {
+          "_attributes": {
+            "key": "annotation-version",
+            "type": "xint",
+            "value": "20151123"
+          }
+        }
+      ],
+      "config": {
+        "_attributes": {
+          "key": "styles"
+        }
+      }
+    },
+    {
+      "_attributes": {
+        "key": "factory_settings"
+      }
+    },
+    {
+      "_attributes": {
+        "key": "ports"
+      },
+      "config": {
+        "_attributes": {
+          "key": "port_1"
+        },
+        "entry": [
+          {
+            "_attributes": {
+              "key": "index",
+              "type": "xint",
+              "value": "1"
+            }
+          },
+          {
+            "_attributes": {
+              "key": "port_spec_class",
+              "type": "xstring",
+              "value": "org.knime.core.data.DataTableSpec"
+            }
+          },
+          {
+            "_attributes": {
+              "key": "port_object_class",
+              "type": "xstring",
+              "value": "org.knime.core.node.BufferedDataTable"
+            }
+          },
+          {
+            "_attributes": {
+              "key": "port_object_summary",
+              "type": "xstring",
+              "value": "Rows: 47, Cols: 3"
+            }
+          },
+          {
+            "_attributes": {
+              "key": "port_dir_location",
+              "type": "xstring",
+              "value": "port_1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "_attributes": {
+        "key": "filestores"
+      },
+      "entry": [
+        {
+          "_attributes": {
+            "key": "file_store_location",
+            "type": "xstring",
+            "isnull": "true",
+            "value": ""
+          }
+        },
+        {
+          "_attributes": {
+            "key": "file_store_id",
+            "type": "xstring",
+            "value": "a77082df-5429-4463-a0fc-c1e46673c623"
+          }
+        }
+      ]
+    }
+  ]
+}
