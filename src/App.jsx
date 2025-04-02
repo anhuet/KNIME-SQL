@@ -1,11 +1,10 @@
-import React from 'react';
-import KNIMEViewer from './KnimeViewer';
+import React from "react";
+import KNIMEViewer from "./KNIMEViewer";
 
 const App = () => {
   return (
     <div>
       <KNIMEViewer />
-
     </div>
   );
 };
