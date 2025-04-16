@@ -151,7 +151,7 @@ export function convertSelectedNodeToSQL(
   }
 }
 
-function KnimeViewer() {
+function KNIMEViewer() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [rawNodeData, setRawNodeData] = useState([]); // Holds data read directly from files
@@ -644,4 +644,4 @@ function KnimeViewer() {
   );
 }
 
-export default KnimeViewer;
+export default KNIMEViewer;

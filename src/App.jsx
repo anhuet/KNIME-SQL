@@ -1,8 +1,8 @@
 import React from "react";
-import KnimeViewer from "./KnimeViewer";
+import KNIMEViewer from "./KNIMEViewer";
 
 const App = () => {
-  return <KnimeViewer />;
+  return <KNIMEViewer />;
 };
 
 export default App;
