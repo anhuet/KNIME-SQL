@@ -1,5 +1,3 @@
-// src/KNIMEViewer.jsx
-
 import { InboxOutlined } from "@ant-design/icons";
 import {
   Button,
