@@ -18,6 +18,7 @@ import * as xmlJs from "xml-js";
 // import _ from "lodash";
 
 // Import all necessary conversion functions
+import { convertConcatenateNodeToSQL } from "./functions/convertConcatenateNodeToSQL"; // Import the new function
 import { parseWorkflowKnime } from "./functions/parseWorkflowKnime"; // [cite: uploaded:src/functions/parseWorkflowKnime.js]
 import { convertCSVReaderNodeToSQL } from "./functions/convertCSVReaderNodeToSQL"; // [cite: uploaded:src/functions/convertCSVReaderNodeToSQL.js]
 import { convertColumnFilterNodeToSQL } from "./functions/convertColumnFilterNodeToSQL"; // [cite: uploaded:src/functions/convertColumnFilterNodeToSQL.js]
@@ -70,6 +71,14 @@ export function convertSelectedNodeToSQL(
   allProcessedNodes = [],
   id // Context of nodes processed *before* the current one
 ) {
+  const predecessorsWithContext = findAllPreviousNodes(
+    // Use your helper
+    id,
+    allProcessedNodes
+  ).map((p) => ({
+    nodeName: p.nodeName || `node_${p.id}_output`,
+    nodes: p.nodes || [],
+  })); // Extract name and columns
   // Determine the primary input table name (often the first predecessor)
   const singlePreviousName =
     predecessorNames.length > 0 ? predecessorNames[0] : "input_table";
@@ -80,6 +89,9 @@ export function convertSelectedNodeToSQL(
   }
 
   switch (factory) {
+    case "org.knime.base.node.preproc.append.row.AppendedRowsNodeFactory":
+      // Pass the node's config and the derived predecessor context
+      return convertConcatenateNodeToSQL(nodeConfig, predecessorsWithContext);
     case "org.knime.base.node.preproc.colconvert.stringtonumber2.StringToNumber2NodeFactory":
       // *** UPDATED CALL ***
       // Pass nodeConfig (with id), the derived previous name, and the processed nodes context
