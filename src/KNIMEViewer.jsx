@@ -27,7 +27,8 @@ import { convertExcelReaderNodeToSQL } from "./functions/convertExcelReaderNodeT
 import { convertColumnMergerNodeToSQL } from "./functions/convertColumnMergerNodeToSQL"; // [cite: uploaded:src/functions/convertColumnMergerNodeToSQL.js]
 import { getColumnNodes } from "./functions/getColumnNodes"; // [cite: uploaded:src/functions/getColumnNodes.js]
 // Import the updated String to Number converter
-import { convertStringToNumberNodeToSQL } from "./functions/convertStringToNumberNodeToSQL"; // [cite: knime_string_to_number_sql]
+import { convertStringToNumberNodeToSQL } from "./functions/convertStringToNumberNodeToSQL";
+import { convertGroupByNodeToSQL } from "./functions/convertGroupByNodeToSQL"; // [cite: knime_string_to_number_sql]
 
 const { Dragger } = Upload;
 const { Title } = Typography;
@@ -111,6 +112,8 @@ export function convertSelectedNodeToSQL(
 
     case "org.knime.base.node.preproc.filter.row3.RowFilterNodeFactory":
       return convertRowFilterNodeToSQL(nodeConfig, singlePreviousName);
+    case "org.knime.base.node.preproc.groupby.GroupByNodeFactory":
+      return convertGroupByNodeToSQL(nodeConfig, singlePreviousName);
 
     case "org.knime.base.node.preproc.duplicates.DuplicateRowFilterNodeFactory":
       // Placeholder for input columns - this function might also need updating
