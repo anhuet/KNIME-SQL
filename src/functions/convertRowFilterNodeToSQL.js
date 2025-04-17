@@ -9,6 +9,10 @@ const getEntryValue = (entryProp, key) => {
   if (!entryProp) return null;
   const entries = Array.isArray(entryProp) ? entryProp : [entryProp];
   const entry = entries.find((e) => e._attributes && e._attributes.key === key);
+  // Handle boolean values specifically
+  if (entry?._attributes?.type === "xboolean") {
+    return entry._attributes.value === "true";
+  }
   return entry?._attributes?.value || null;
 };
 
@@ -47,15 +51,14 @@ const mapKnimeOperatorToSQL = (knimeOperator) => {
       return ">";
     case "GE":
       return ">=";
-    case "LIKE": // Handles "Matches wildcard"
+    case "LIKE":
       return "LIKE";
-    case "REGEX": // Handles "Matches regex" - Note: SQL function varies by dialect (REGEXP, RLIKE, REGEXP_LIKE)
-      return "REGEXP"; // Using REGEXP as a common default, adjust if needed for specific DB
+    case "REGEX":
+      return "REGEXP"; // Adjust if needed for specific DB
     case "IS_MISSING":
       return "IS NULL";
     case "IS_NOT_MISSING":
       return "IS NOT NULL";
-    // Add other operators if encountered (e.g., STARTS_WITH, ENDS_WITH -> could use LIKE)
     default:
       console.warn(
         `Unsupported KNIME operator: ${knimeOperator}. Defaulting to '='.`
@@ -71,9 +74,8 @@ const mapKnimeOperatorToSQL = (knimeOperator) => {
  * @returns {string} - The SQL LIKE pattern string.
  */
 const translateKnimeWildcardToSQL = (knimePattern) => {
-  // 1. Escape existing SQL wildcards (_, %) in the original string
+  if (typeof knimePattern !== "string") return ""; // Handle non-string input
   let sqlPattern = knimePattern.replace(/%/g, "\\%").replace(/_/g, "\\_");
-  // 2. Translate KNIME wildcards (*, ?) to SQL wildcards (%, _)
   sqlPattern = sqlPattern.replace(/\*/g, "%").replace(/\?/g, "_");
   return sqlPattern;
 };
@@ -103,8 +105,8 @@ export function convertRowFilterNodeToSQL(nodeConfig, previousNodeName) {
   }
 
   // Step 3: Extract filtering parameters
-  const outputMode = getEntryValue(modelNode.entry, "outputMode"); // "MATCHING" or "NON_MATCHING"
-  const matchCriteria = getEntryValue(modelNode.entry, "matchCriteria"); // "AND" or "OR"
+  const outputMode = getEntryValue(modelNode.entry, "outputMode");
+  const matchCriteria = getEntryValue(modelNode.entry, "matchCriteria");
   const predicatesNode = findConfigByKey(modelNode.config, "predicates");
 
   if (
@@ -113,7 +115,7 @@ export function convertRowFilterNodeToSQL(nodeConfig, previousNodeName) {
     !predicatesNode ||
     !predicatesNode.config
   ) {
-    return "Error: Essential filtering parameters (outputMode, matchCriteria, predicates) not found in the model.";
+    return "Error: Essential filtering parameters (outputMode, matchCriteria, predicates) not found.";
   }
 
   const predicateConfigs = Array.isArray(predicatesNode.config)
@@ -158,63 +160,86 @@ export function convertRowFilterNodeToSQL(nodeConfig, previousNodeName) {
       // Handle operators that don't need a value first
       const sqlOperator = mapKnimeOperatorToSQL(knimeOperator);
       if (sqlOperator === "IS NULL" || sqlOperator === "IS NOT NULL") {
-        return `"${columnName}" ${sqlOperator}`;
+        const quotedColumnName = `"${columnName.replace(/"/g, '""')}"`;
+        return `${quotedColumnName} ${sqlOperator}`;
       }
 
+      // --- START: FIX for valueConfig structure ---
       // Now handle operators that require a value
-      const valueConfig = findConfigByKey(valuesNode.config, "0"); // Assuming index '0' for single value
-      if (!valueConfig || !valueConfig.entry) {
+      // valuesNode.config might be an object { "_attributes": { "key": "0" }, config: ..., entry: ... }
+      // or an array of such objects if multiple values are possible (e.g., for IN operator)
+      // We'll assume the common case of a single value config under key "0" based on your example.
+      const singleValueConfig = findConfigByKey(valuesNode.config, "0"); // Find the config keyed "0"
+
+      if (
+        !singleValueConfig ||
+        !singleValueConfig.entry ||
+        !singleValueConfig.config
+      ) {
         console.warn(
-          `Skipping predicate for column "${columnName}" due to missing value configuration.`
+          `Skipping predicate for column "${columnName}" due to missing or invalid value configuration under key '0'.`
         );
         return null;
       }
 
-      const value = getEntryValue(valueConfig.entry, "value");
-      const isNull =
-        getEntryValue(
-          valueConfig.config?.find(
-            (c) => c._attributes.key === "typeIdentifier"
-          )?.entry,
-          "is_null"
-        ) === "true";
+      // Extract value from the 'entry' property of singleValueConfig
+      const value = getEntryValue(singleValueConfig.entry, "value");
+
+      // Extract type info from the 'config' property (typeIdentifier) of singleValueConfig
+      const typeIdentifierConfig = findConfigByKey(
+        singleValueConfig.config,
+        "typeIdentifier"
+      );
+      const isNull = getEntryValue(typeIdentifierConfig?.entry, "is_null"); // is_null is boolean
+      const cellClass = getEntryValue(
+        typeIdentifierConfig?.entry,
+        "cell_class"
+      );
+
+      // --- END: FIX for valueConfig structure ---
 
       // Check if the value itself represents NULL (though IS_MISSING should handle this)
-      if (isNull) {
-        return `"${columnName}" IS NULL`; // Or potentially IS NOT NULL depending on operator? Seems unlikely.
+      if (isNull === true) {
+        // Explicit boolean check
+        const quotedColumnName = `"${columnName.replace(/"/g, '""')}"`;
+        return `${quotedColumnName} IS NULL`;
+      }
+
+      // Value extraction should handle different types (string, int, etc.)
+      if (value === null || value === undefined) {
+        console.warn(
+          `Skipping predicate for column "${columnName}" because extracted value is null or undefined.`
+        );
+        return null; // Cannot compare against null like this, IS NULL/IS NOT NULL should be used.
       }
 
       let sqlValue = "";
       let condition = "";
+      const quotedColumnName = `"${columnName.replace(/"/g, '""')}"`;
 
-      // Determine if the value is inherently string-like from KNIME's perspective
-      const isStringType = valueConfig.config
-        ?.find((c) => c._attributes.key === "typeIdentifier")
-        ?.entry?.find((e) => e._attributes.key === "cell_class")
-        ?._attributes?.value?.includes("StringCell");
-      const needsQuotes = isStringType || isNaN(Number(value)); // Quote if KNIME says string OR if it's not a valid number
+      // Determine if the value needs quotes based on cellClass or failing Number conversion
+      const isStringType = cellClass?.includes("StringCell");
+      const isNumeric = !isNaN(Number(value)); // Check if value *can* be treated as a number
+      const needsQuotes = isStringType || !isNumeric; // Quote if KNIME says string OR if it's not a number
 
-      // Prepare the value based on operator type
+      // Prepare the value based on operator type and quoting needs
       if (sqlOperator === "LIKE") {
-        // Translate KNIME wildcards and escape for SQL LIKE
         sqlValue = `'${translateKnimeWildcardToSQL(value).replace(
           /'/g,
           "''"
         )}'`;
       } else if (sqlOperator === "REGEXP") {
-        // Just quote the regex string, escaping internal single quotes
         sqlValue = `'${value.replace(/'/g, "''")}'`;
       } else if (needsQuotes) {
-        // Standard string quoting
         sqlValue = `'${value.replace(/'/g, "''")}'`;
       } else {
-        // Numeric value
-        sqlValue = value;
+        sqlValue = value; // Numeric value, no quotes
       }
 
-      // Handle case sensitivity (only relevant for string comparisons like =, !=, LIKE, REGEXP)
-      const caseSensitiveConfig = valueConfig.config?.find(
-        (c) => c._attributes.key === "stringCaseMatching"
+      // Handle case sensitivity (relevant for string types)
+      const caseSensitiveConfig = findConfigByKey(
+        singleValueConfig.config,
+        "stringCaseMatching"
       );
       const caseSensitive =
         getEntryValue(caseSensitiveConfig?.entry, "caseMatching") ===
@@ -228,28 +253,25 @@ export function convertRowFilterNodeToSQL(nodeConfig, previousNodeName) {
           sqlOperator === "LIKE" ||
           sqlOperator === "REGEXP")
       ) {
-        // Apply LOWER to both column and value for case-insensitive comparison
-        // Note: LOWER might impact index usage on the column.
-        condition = `LOWER("${columnName}") ${sqlOperator} LOWER(${sqlValue})`;
-        // For REGEXP, case-insensitivity might be handled by flags/functions depending on SQL dialect,
-        // LOWER() might not always work as expected with REGEXP. Check dialect specifics.
+        // Apply LOWER for case-insensitive comparison on strings
+        condition = `LOWER(${quotedColumnName}) ${sqlOperator} LOWER(${sqlValue})`;
         if (sqlOperator === "REGEXP") {
           console.warn(
-            `Case-insensitive REGEXP for "${columnName}" using LOWER(). Verify compatibility with your SQL dialect.`
+            `Case-insensitive REGEXP for "${columnName}" using LOWER(). Verify compatibility/syntax with your SQL dialect.`
           );
         }
       } else {
-        // Case-sensitive comparison or numeric comparison
-        condition = `"${columnName}" ${sqlOperator} ${sqlValue}`;
+        // Case-sensitive string comparison or numeric comparison
+        condition = `${quotedColumnName} ${sqlOperator} ${sqlValue}`;
       }
 
-      // Add ESCAPE clause for LIKE if we translated wildcards that needed escaping
+      // Add ESCAPE clause for LIKE if necessary
       if (
         sqlOperator === "LIKE" &&
         translateKnimeWildcardToSQL(value) !==
           value.replace(/\*/g, "%").replace(/\?/g, "_")
       ) {
-        condition += " ESCAPE '\\'"; // Standard SQL escape character
+        condition += " ESCAPE '\\'";
       }
 
       return condition;
@@ -258,13 +280,11 @@ export function convertRowFilterNodeToSQL(nodeConfig, previousNodeName) {
 
   if (conditions.length === 0) {
     console.warn("No valid filter conditions generated from predicates.");
-    // If NON_MATCHING and no conditions, it means NOT (FALSE) -> TRUE -> Select All
-    // If MATCHING and no conditions, it means TRUE -> Select All
-    // However, this usually indicates an issue, so maybe returning an error/warning comment is better.
-    return `SELECT * FROM ${previousNodeName}; -- Warning: No valid filter conditions generated or applied`;
+    const quotedPreviousNodeName = `"${previousNodeName.replace(/"/g, '""')}"`;
+    return `SELECT * FROM ${quotedPreviousNodeName}; -- Warning: No valid filter conditions generated or applied`;
   }
 
-  // Step 5: Combine conditions with AND/OR
+  // Step 5: Combine conditions
   const combinedConditions = conditions.join(` ${matchCriteria} `);
 
   // Step 6: Apply outputMode
@@ -274,13 +294,8 @@ export function convertRowFilterNodeToSQL(nodeConfig, previousNodeName) {
       : combinedConditions;
 
   // Step 7: Construct final SQL query
-  const sqlQuery = `SELECT * FROM ${previousNodeName} WHERE ${whereClause};`;
+  const quotedPreviousNodeName = `"${previousNodeName.replace(/"/g, '""')}"`;
+  const sqlQuery = `SELECT * FROM ${quotedPreviousNodeName} WHERE ${whereClause};`;
 
   return sqlQuery;
 }
-
-// Example Usage:
-// const nodeConfigJson = { ... }; // Your parsed JSON for the Row Filter node
-// const previousTableName = "previous_step_results";
-// const sql = convertRowFilterNodeToSQL(nodeConfigJson, previousTableName);
-// console.log(sql);

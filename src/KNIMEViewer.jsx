@@ -16,6 +16,7 @@ import * as xmlJs from "xml-js";
 // import _ from "lodash";
 
 // Import all necessary conversion functions
+import { convertSorterNodeToSQL } from "./functions/convertSorterNodeToSQL";
 import { convertConcatenateNodeToSQL } from "./functions/convertConcatenateNodeToSQL"; // Import the new function
 import { parseWorkflowKnime } from "./functions/parseWorkflowKnime"; // [cite: uploaded:src/functions/parseWorkflowKnime.js]
 import { convertCSVReaderNodeToSQL } from "./functions/convertCSVReaderNodeToSQL"; // [cite: uploaded:src/functions/convertCSVReaderNodeToSQL.js]
@@ -101,6 +102,8 @@ export function convertSelectedNodeToSQL(
         selectedNode.id
         // Pass the context
       );
+    case "org.knime.base.node.preproc.sorter.SorterNodeFactory":
+      return convertSorterNodeToSQL(nodeConfig, singlePreviousName);
 
     // --- Calls to other functions remain unchanged for now ---
     // --- Consider updating them later to use allProcessedNodes if needed ---
